@@ -1,0 +1,47 @@
+# Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  namespace: demoapp
+  name: userservice-deploy
+  labels:
+    app: userservice
+    type: web
+spec:
+  template:
+    metadata:
+      name: userservice-pod
+      namespace: demoapp
+      labels:
+        app: userservice
+        type: web
+    spec:
+      containers:
+        - name: userservice
+          image: krishnanmano/userservice
+          imagePullPolicy: IfNotPresent
+  replicas: 1
+  selector:
+    matchLabels:
+      app: userservice
+      type: web
+
+---
+# Nodeport services
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: demoapp
+  name: userservice-service
+  labels:
+    app: userservice
+    type: web
+spec:
+  type: NodePort
+  ports:
+    - port: 9090 # (Mandotory field)
+      targetPort: 9090 #(Optional field) By default and for convenience, the `targetPort` is set to the same value as the `port` field.
+      nodePort: 30007 # By default and for convenience, the Kubernetes control plane will allocate a port from a range (default: 30000-32767)
+  selector:
+    app: userservice
+    type: web
